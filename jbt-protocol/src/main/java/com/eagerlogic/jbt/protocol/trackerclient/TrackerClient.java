@@ -10,12 +10,14 @@ import com.eagerlogic.bencode.BEncode;
 import com.eagerlogic.bencode.DictionaryValue;
 import com.eagerlogic.bencode.IntegerValue;
 import com.eagerlogic.bencode.ListValue;
+import com.eagerlogic.bencode.StringValue;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -111,15 +113,42 @@ public class TrackerClient {
         return intervalValue.getValue();
     }
     
-    private static Peer[] parsePeers(DictionaryValue res) {
-        ListValue peersValue = (ListValue) res.getValue().get("peers");
-        
-        List<Peer> resList = new ArrayList<Peer>();
-        for (AValue<?> value : peersValue.getValue()) {
+    private static Peer[] parsePeers(DictionaryValue res) throws TrackerException {
+        AValue<?> peersValue = res.getValue().get("peers");
+        if (peersValue instanceof StringValue) {
+            return parseCompactPeers((StringValue) peersValue);
+        } else {
+            return parsePeersList((ListValue) peersValue);
+        }
+    }
+    
+    private static Peer[] parsePeersList(ListValue peersList) {
+        List<Peer> resList = new ArrayList<>();
+        for (AValue<?> value : peersList.getValue()) {
             DictionaryValue peerValue = (DictionaryValue) value;
             resList.add(parsePeer(peerValue));
         }
         return resList.toArray(new Peer[resList.size()]);
+    }
+    
+    private static Peer[] parseCompactPeers(StringValue peersString) throws TrackerException {
+        String peerListStr = peersString.getValue();
+        byte[] data = peerListStr.getBytes(Charset.forName("UTF-8"));
+        if ((data.length % 6) != 0) {
+            throw new TrackerException("Invalid response. Compacted peer list length mismatch");
+        }
+        
+        List<Peer> resList = new ArrayList<>();
+        for (int i = 0; i < data.length / 6; i = i + 6) {
+            resList.add(parsePeer(data, i * 6));
+        }
+        return resList.toArray(new Peer[resList.size()]);
+    }
+    
+    private static Peer parsePeer(byte[] data, int offset) {
+        String host = (data[offset] & 0xff) + "." + (data[offset + 1] & 0xff) + "." + (data[offset + 2] & 0xff) + "." + (data[offset + 3] & 0xff);
+        int port = ((data[offset + 4] & 0xff) << 8) | (data[offset + 5] & 0xff);
+        return new Peer(null, host, port);
     }
     
     private static Peer parsePeer(DictionaryValue peerValue) {
