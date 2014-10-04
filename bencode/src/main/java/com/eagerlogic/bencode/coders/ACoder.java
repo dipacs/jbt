@@ -19,14 +19,14 @@ public abstract class ACoder<T extends AValue<?>> {
         return decode(new StringReader(bencodedString));
     }
     
-    public String encode(T value) {
+    public String encode(T value) throws CodingException {
         StringBuilder sb = new StringBuilder();
         encode(value, sb);
         return sb.toString();
     }
     
     public abstract T decode(StringReader reader) throws IOException, CodingException;
-    public abstract void encode(T value, StringBuilder sb);
+    public abstract void encode(T value, StringBuilder sb) throws CodingException;
     public abstract boolean canDecode(StringReader reader) throws IOException;
     
 }

@@ -12,13 +12,13 @@ import java.util.List;
  *
  * @author dipacs
  */
-public class ListValue extends AValue<List<AValue>> {
+public class ListValue extends AValue<List<AValue<?>>> {
 
     public ListValue() {
-        super(new ArrayList<AValue>());
+        super(new ArrayList<AValue<?>>());
     }
 
-    public ListValue(List<AValue> value) {
+    public ListValue(List<AValue<?>> value) {
         super(value);
     }
     

@@ -33,7 +33,7 @@ public class ListCoder extends ACoder<ListValue> {
     }
 
     @Override
-    public void encode(ListValue value, StringBuilder sb) {
+    public void encode(ListValue value, StringBuilder sb) throws CodingException {
         sb.append('l');
         for (AValue<?> item : value.getValue()) {
             BEncode.getInstance().encode(item, sb);

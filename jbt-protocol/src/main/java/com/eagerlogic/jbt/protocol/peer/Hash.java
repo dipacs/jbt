@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.eagerlogic.jbt.protocol.btclient;
+package com.eagerlogic.jbt.protocol.peer;
 
 import java.util.Objects;
 
@@ -23,6 +23,11 @@ public class Hash {
         this.bytes = bytes;
         this.str = bytesToString(bytes);
     }
+    
+    public Hash(String hashString) {
+        this.str = hashString.toUpperCase();
+        this.bytes = stringToBytes(str);
+    }
 
     public byte[] getBytes() {
         return bytes;
@@ -38,7 +43,7 @@ public class Hash {
         for (byte b : bytes) {
             res += byteToString(b);
         }
-        return res;
+        return res.toUpperCase();
     }
     
     private String byteToString(byte b) {
@@ -47,6 +52,30 @@ public class Hash {
             res = "0" + res;
         }
         return res;
+    }
+    
+    private byte[] stringToBytes(String str) {
+        if (str.length() % 2 != 0) {
+            throw new IllegalArgumentException("Invalid hash string length.");
+        }
+        byte[] res = new byte[str.length() / 2];
+        char[] chars = str.toCharArray();
+        for (int i = 0; i < bytes.length; i++) {
+            res[i] = (byte) ((hexCharToByte(chars[i * 2]) << 4) + hexCharToByte(chars[i * 2 + 1]));
+        }
+        return res;
+    }
+    
+    private int hexCharToByte(char c) {
+        if (c >= '0' && c <= '9') {
+            return c - 48;
+        } else if (c >= 'A' && c <= 'F') {
+            return c - 65;
+        } else if (c >= 'a' && c <= 'f') {
+            return c - 97;
+        } else {
+            throw new IllegalArgumentException("The given character is not a hex character: " + c);
+        }
     }
 
     @Override

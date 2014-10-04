@@ -9,9 +9,9 @@ package com.eagerlogic.bencode;
  *
  * @author dipacs
  */
-public class IntegerValue extends AValue<Integer> {
+public class IntegerValue extends AValue<Long> {
 
-    public IntegerValue(Integer value) {
+    public IntegerValue(Long value) {
         super(value);
     }
     

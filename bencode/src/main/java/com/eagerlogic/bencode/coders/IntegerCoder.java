@@ -26,12 +26,12 @@ public class IntegerCoder extends ACoder<IntegerValue> {
             }
             str += c;
         }
-        return new IntegerValue(Integer.parseInt(str));
+        return new IntegerValue(Long.parseLong(str));
     }
 
     @Override
     public void encode(IntegerValue value, StringBuilder sb) {
-        sb.append("i").append(value.getValue().intValue()).append("e");
+        sb.append("i").append(value.getValue().longValue()).append("e");
     }
 
     @Override

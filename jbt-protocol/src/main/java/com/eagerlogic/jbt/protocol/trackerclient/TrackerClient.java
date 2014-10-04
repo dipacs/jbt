@@ -110,7 +110,7 @@ public class TrackerClient {
         if (intervalValue == null) {
             throw new TrackerException("Invalid tracker response. Missing 'interval' key.");
         }
-        return intervalValue.getValue();
+        return (int) intervalValue.getValue().longValue();
     }
     
     private static Peer[] parsePeers(DictionaryValue res) throws TrackerException {
