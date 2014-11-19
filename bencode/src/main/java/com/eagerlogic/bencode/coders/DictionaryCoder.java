@@ -36,7 +36,7 @@ public class DictionaryCoder extends ACoder<DictionaryValue> {
     }
 
     @Override
-    public void encode(DictionaryValue value, StringBuilder sb) {
+    public void encode(DictionaryValue value, StringBuilder sb) throws CodingException {
         sb.append("d");
         for (Map.Entry<String, AValue<?>> entry : value.getValue().entrySet()) {
             BEncode.getInstance().encode(new StringValue(entry.getKey()), sb);

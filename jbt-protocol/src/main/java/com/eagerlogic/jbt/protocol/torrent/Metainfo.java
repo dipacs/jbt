@@ -37,6 +37,7 @@ public class Metainfo {
     private List<Hash> pieces;
     private long length;
     private List<FileDescriptor> files;
+    private Hash infoHash;
     
     public Metainfo(File file) throws FileNotFoundException, CodingException {
         FileInputStream fis = new FileInputStream(file);
@@ -56,6 +57,7 @@ public class Metainfo {
             } catch (IOException | CodingException ex) {
                 throw new CodingException("Invalid torrent file. Bencoding failed.", ex);
             }
+            calculateInfoHash(content);
         } finally {
             if (is != null) {
                 try {
@@ -65,6 +67,61 @@ public class Metainfo {
                 }
             }
         }
+    }
+    
+    private void calculateInfoHash(String content) throws CodingException {
+        int start = content.indexOf("4:info") + 6;
+        int end = -1;
+        char[] chars = content.toCharArray();
+        int level = 0;
+        for (int i = start; i < chars.length; i++) {
+            int nextOffset = parseString(chars, i);
+            if (nextOffset != i) {
+                i = nextOffset - 1;
+                continue;
+            }
+            char c = chars[i];
+            if (c == 'd' || c == 'l' || c == 'i') {
+                level++;
+                continue;
+            }
+            if (c == 'e') {
+                level--;
+                if (level == 0) {
+                    end = i + 1;
+                    break;
+                }
+            }
+        }
+        if (end < 0 || start < 0) {
+            throw new CodingException("Invalid metainfo file. Can't read info field.");
+        }
+        
+        String infoString = content.substring(start, end);
+        try {
+            infoHash = Hash.hash(infoString.getBytes("UTF-8"));
+        } catch (UnsupportedEncodingException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+    
+    private int parseString(char[] chars, int offset) {
+        String lenStr = "";
+        int i = offset;
+        while (true) {
+            char c = chars[i];
+            if (c >= '0' && c <= '9') {
+                lenStr += c;
+            } else {
+                break;
+            }
+            i++;
+        }
+        if (lenStr.length() < 1) {
+            return offset;
+        }
+        int len = Integer.parseInt(lenStr);
+        return offset + lenStr.length() + 1 + len;
     }
     
     private void parseMetaInfo(DictionaryValue metainfo) throws CodingException {

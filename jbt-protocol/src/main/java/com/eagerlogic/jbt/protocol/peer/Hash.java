@@ -5,6 +5,8 @@
  */
 package com.eagerlogic.jbt.protocol.peer;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
 
 /**
@@ -12,6 +14,16 @@ import java.util.Objects;
  * @author dipacs
  */
 public class Hash {
+    
+    public static final Hash hash(byte[] data) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-1");
+            byte[] hashedBytes = digest.digest(data);
+            return new Hash(hashedBytes);
+        } catch (NoSuchAlgorithmException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
     
     private final byte[] bytes;
     private final String str;

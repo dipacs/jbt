@@ -11,6 +11,7 @@ import com.eagerlogic.bencode.DictionaryValue;
 import com.eagerlogic.bencode.IntegerValue;
 import com.eagerlogic.bencode.ListValue;
 import com.eagerlogic.bencode.StringValue;
+import com.eagerlogic.jbt.protocol.peer.Hash;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -48,10 +49,10 @@ public class TrackerClient {
         
     }
     
-    public static TrackerResponse announce(String announceUrl, String infoHash, String peerId, String ip, int listeningPort, int uploaded, int downloaded, int left, EEvent event) throws TrackerException, MalformedURLException, IOException {
+    public static TrackerResponse announce(String announceUrl, Hash infoHash, String peerId, String ip, int listeningPort, int uploaded, int downloaded, int left, EEvent event) throws TrackerException, MalformedURLException, IOException {
         String url = announceUrl + "?";
         
-        url += "?info_hash=" + urlEncode(infoHash);
+        url += "?info_hash=" + urlEncode(new String(infoHash.getBytes(), "UTF-8"));
         url += "&peer_id=" + urlEncode(peerId);
         if (ip != null) {
             url += "&ip=" + urlEncode(ip);
